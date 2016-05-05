@@ -8,28 +8,33 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.fpm.*;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 public class Main {
 
-    private static final String SMALL_FILE_PATH = "/Users/Marcin/PJWSTK/ADD/projekt_nr_1/Datasets/retail_small_test.dat.txt";
-    private static final String EXAMPLE_FILE_PATH = "/Users/Marcin/PJWSTK/ADD/projekt_nr_1/Datasets/example.txt";
-    private static final String FILE_PATH = "/Users/Marcin/PJWSTK/ADD/projekt_nr_1/Datasets/retail.dat.txt";
+    private static final String SMALL_FILE_PATH = "data"+File.separatorChar+"retail_small_test.dat.txt";
+    private static final String EXAMPLE_FILE_PATH = "data"+File.separatorChar+"example.txt";
+    private static final String FILE_PATH = "data"+File.separatorChar+"retail.dat.txt";
+
+    private String getFilePath(String file){
+        return new File(getClass().getClassLoader().getResource(file).getFile()).getAbsolutePath();
+    }
 
     public static void main(String[] args) {
         Logger.getRootLogger().setLevel(Level.ERROR);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
 
+        Main main = new Main();
+
         SparkConf conf = new SparkConf().setMaster("local").setAppName("ADD first app");
         JavaSparkContext sparkContext = new JavaSparkContext(conf);
 
-//        JavaRDD<String> data = sparkContext.textFile(SMALL_FILE_PATH);
-//        JavaRDD<String> data = sparkContext.textFile(FILE_PATH);
-//        JavaRDD<String> data = sparkContext.textFile(EXAMPLE_FILE_PATH);
-//        JavaRDD<String> data = sparkContext.textFile(FILE_PATH).sample(true, 0.9);
-        JavaRDD<String> data = sparkContext.textFile(FILE_PATH);
+        JavaRDD<String> data = sparkContext.textFile(main.getFilePath(EXAMPLE_FILE_PATH));
+//        JavaRDD<String> data = sparkContext.textFile(main.getFilePath(SMALL_FILE_PATH));
+//        JavaRDD<String> data = sparkContext.textFile(main.getFilePath(FILE_PATH));
 
 
 
@@ -41,7 +46,7 @@ public class Main {
         });
 
 //        FPGrowth fpGrowth = new FPGrowth().setMinSupport(0.6).setNumPartitions(10);
-        FPGrowth fpGrowth = new FPGrowth().setMinSupport(0.01);
+        FPGrowth fpGrowth = new FPGrowth().setMinSupport(0.2);
         FPGrowthModel<String> fpGrowthModel = fpGrowth.run(transactions);
 
         //FPGrowth
@@ -57,11 +62,6 @@ public class Main {
         for(AssociationRules.Rule<String> rule: fpGrowthModel.generateAssociationRules(minConfidence).toJavaRDD().collect()){
             System.out.println(rule.javaAntecedent() + " => " + rule.javaConsequent() + ", " + rule.confidence());
         }
-
-//        PrefixSpan prefixSpan = new PrefixSpan();
-//        for(PrefixSpan.FreqSequence<Object> freqSequence: prefixSpan.run(transactions).freqSequences().toJavaRDD().collect()){
-//            System.out.println(freqSequence.javaSequence() + ", " + freqSequence.freq());
-//        }
 
         sparkContext.close();
     }
