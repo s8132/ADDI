@@ -39,6 +39,7 @@ public class Main {
         JavaSparkContext sparkContext = new JavaSparkContext(conf);
         // Load data
         JavaRDD<String> data = sparkContext.textFile(utils.getFilePath(FILE_PATH));
+
         // Convert data
         JavaRDD<List<String>> transactions = data.map(new Function<String, List<String>>() {
             public List<String> call(String s) throws Exception {
