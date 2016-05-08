@@ -18,8 +18,8 @@ public class Main {
 
     private static final String FILE_PATH = "data"+File.separatorChar+"retail.dat.txt";
     private static List<String> productList = new ArrayList<String>();
-    private static final Double MIN_SUPPORT = 0.09;
-    private static final Double MIN_CONFIDENCE = 0.5;
+    private static final Double MIN_SUPPORT = 0.01;
+    private static final Double MIN_CONFIDENCE = 0.8;
 
     private static final String SEARCH_PRODUCT = "38";
     private static List<FPGrowth.FreqItemset<String>> freqProduct = new ArrayList<FPGrowth.FreqItemset<String>>();
@@ -69,7 +69,8 @@ public class Main {
         //Association
         System.out.println("\nAssociation result:");
         for(AssociationRules.Rule<String> rule: fpGrowthModel.generateAssociationRules(MIN_CONFIDENCE).toJavaRDD().collect()){
-            if(rule.javaAntecedent().contains(SEARCH_PRODUCT) || rule.javaConsequent().contains(SEARCH_PRODUCT)){
+//            if(rule.javaAntecedent().contains(SEARCH_PRODUCT) || rule.javaConsequent().contains(SEARCH_PRODUCT)){
+            if(rule.javaAntecedent().contains(SEARCH_PRODUCT)){
                 ruleProduct.add(rule);
             }
             System.out.println("\t" + rule.javaAntecedent() + " => " + rule.javaConsequent() + ", confidence: " + String.format("%.2f", rule.confidence()));
